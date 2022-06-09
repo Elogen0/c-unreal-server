@@ -9,31 +9,11 @@
 #include <future>
 #include "ThreadManager.h"
 
-#include "PlayerManager.h"
-#include "AccountManager.h"
 
 int main()
 {
-    GThreadManager->Launch([=] 
-        {
-            while (true)
-            {
-                cout << "PlayerThenAccount" << endl;
-                GPlayerManager.PlayerThenAccount();
-                this_thread::sleep_for(100ms);
-            }
-        });
+    vector<int32, StlAllocator<int32>> v(100);
 
-    GThreadManager->Launch([=] 
-        {
-            while (true)
-            {
-                cout << "AccountThenPlayer" << endl;
-                GAccountManager.AccountThenPlayer();
-                this_thread::sleep_for(100ms);
-            }
-        });
-
-    GThreadManager->Join();
+    Map<int32, int32> m;
 }
 
