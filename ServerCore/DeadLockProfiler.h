@@ -20,10 +20,9 @@ private:
     map<int32, set<int32>>              _lockHistory; // from -> to
     Mutex _lock;
 private:
-    vector<int32> _discoveredOrder; //노드가 발견된 순서를 기록하는 배열
-    int32 _discoveredCount = 0; //노드가 발견된 순서
-    vector<bool> _finished; // Dfs(i)가 종료되었는지 여부
-    vector<int32> _parent; //발견된 부모
-        
+    vector<int32>   _discoveredOrder; //노드가 발견된 순서를 기록하는 배열
+    int32           _discoveredCount = 0; //노드가 발견된 순서
+    vector<bool>    _finished; // Dfs(i)가 종료되었는지 여부
+    vector<int32>   _parent; //발견된 부모
 };
 
