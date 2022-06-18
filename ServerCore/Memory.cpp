@@ -56,17 +56,21 @@ void* Memory::Allocate(int32 size)
     MemoryHeader* header = nullptr;
 
     const int32 allocSize = size + sizeof(MemoryHeader);
-
+#ifdef _STOMP
+    header = reinterpret_cast<MemoryHeader*>(StompAllocator::Alloc(allocSize));
+#else
     if (allocSize > MAX_ALLOC_SIZE)
     {
-        // ¸Ş¸ğ¸® Ç®¸µ ÃÖ´ë Å©±â¸¦ ¹ş¾î³ª¸é ÀÏ¹İ ÇÒ´ç
+        // ë©”ëª¨ë¦¬ í’€ë§ ìµœëŒ€ í¬ê¸°ë¥¼ ë²—ì–´ë‚˜ë©´ ì¼ë°˜ í• ë‹¹
         header = reinterpret_cast<MemoryHeader*>(::malloc(allocSize));
     }
     else
     {
-        //¸Ş¸ğ¸® Ç®¿¡¼­ ²¨³»¿Â´Ù
+        //ë©”ëª¨ë¦¬ í’€ì—ì„œ êº¼ë‚´ì˜¨ë‹¤
         header = _poolTable[allocSize]->Pop();
     }
+#endif
+
     return MemoryHeader::AttachHeader(header, allocSize);
 }
 
@@ -77,15 +81,19 @@ void Memory::Release(void* ptr)
     const int32 allocSize = header->allocSize;
     ASSERT_CRASH(allocSize > 0);
 
+#ifdef _STOMP
+    StompAllocator::Release(header);
+#else
     if (allocSize > MAX_ALLOC_SIZE)
     {
-        //¸Ş¸ğ¸® Ç®¸µ ÃÖ´ë Å©±â¸¦ ¹ş¾î³ª¸é ÀÏ¹İÇØÁ¦
+        //ë©”ëª¨ë¦¬ í’€ë§ ìµœëŒ€ í¬ê¸°ë¥¼ ë²—ì–´ë‚˜ë©´ ì¼ë°˜í•´ì œ
         ::free(header);
     }
     else
     {
-        //¸Ş¸ğ¸® Ç®¿¡ ¹İ³³ÇÑ´Ù
+        //ë©”ëª¨ë¦¬ í’€ì— ë°˜ë‚©í•œë‹¤
         _poolTable[allocSize]->Push(header);
     }
+#endif
 
 }
