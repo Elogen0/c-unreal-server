@@ -21,10 +21,13 @@ using LockGuard = std::lock_guard<std::mutex>;
 
 #define size16(val)     static_cast<int16>(sizeof(val))
 #define size32(val)     static_cast<int32>(sizeof(val))
-#define len16(val)      static_cast<int16>(sizeof(arr)/sizeof(arr[0]));
-#define len32(arr)      static_cast<int32>(sizeof(arr)/sizeof(arr[0]));
+#define len16(val)      static_cast<int16>(sizeof(arr)/sizeof(arr[0]))
+#define len32(arr)      static_cast<int32>(sizeof(arr)/sizeof(arr[0]))
 
 // shared_ptr
 #define USING_SHARED_PTR(name)	using name##Ref = std::shared_ptr<class name>;
+USING_SHARED_PTR(IocpCore);
+USING_SHARED_PTR(IocpObject);
+
 
 #define _STOMP

@@ -177,7 +177,7 @@ To TypeCast(From* ptr)
 
 
 template<typename To, typename From>
-shared_ptr<To> TypeCast(shared_ptr<From> ptr)
+std::shared_ptr<To> TypeCast(shared_ptr<From> ptr)
 {
 	if (ptr == nullptr)
 		return nullptr;
