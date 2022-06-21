@@ -28,7 +28,7 @@ struct MemoryHeader : public SLIST_ENTRY
 	}
 
 	int32 allocSize;
-	// TODO : ÇÊ¿äÇÑ Ãß°¡ Á¤º¸
+	// TODO : í•„ìš”í•œ ì¶”ê°€ ì •ë³´
 };
 
 /*-----------------

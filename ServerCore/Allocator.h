@@ -49,10 +49,10 @@ public:
     {
         //memory size
         const int32 size = static_cast<int32>(count * sizeof(T));
-        return static_cast<T*>(x_alloc(size));
+        return static_cast<T*>(exalloc(size));
     }
 
-    void deallocate(T ptr, size_t count) //count : size x, °¹¼ö
+    void deallocate(T ptr, size_t count) //count : size x, ê°¯ìˆ˜
     {
 
     }

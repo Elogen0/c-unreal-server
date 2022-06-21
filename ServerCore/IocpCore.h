@@ -1,17 +1,20 @@
 #pragma once
 
 /*------------------------
-        IocpObject
+    IocpObject
+IOCP에 등록 할 오브젝트는 이 클래스를 상속하여 사용
+IocpCore로부터 IocpEvent를 통해 실행된다.
 --------------------------*/
-class IocpCore
+class IocpObject : public enable_shared_from_this<IocpObject>
 {
 public:
-    virtual HANDLE Gethandle() abstract;
-    virtual void Dispatch(class iocpEvent* iocpEvent, int32 numObBytes = 0) abstract;
+    virtual HANDLE  GetHandle() abstract;
+    /* IocpCore Dispatch에서 실행시켜 준다. */
+    virtual void    Dispatch(class IocpEvent* iocpEvent, int32 numObBytes = 0) abstract;
 };
 
 /*------------------------
-        IocpObject
+        IocpCore
 --------------------------*/
 
 class IocpCore
@@ -20,11 +23,13 @@ public:
     IocpCore();
     ~IocpCore();
 
-    HANDLE GetHandle() {return _iocp}
+    HANDLE      GetHandle() { return _iocpHandle; }
 
-    bool Register(IocpObjectRef iocpObject);
-    bool Dispatch(uint32 timeoutMs = INFINITE);
+    /*iocp 관찰 요청*/
+    bool        Register(IocpObjectRef iocpObject);
+    /*I/O 완료될 경우 실행*/
+    bool        Dispatch(uint32 timeoutMs = INFINITE);
 private:
-    HANDLE _iocpHandle;
+    HANDLE      _iocpHandle;
 };
 

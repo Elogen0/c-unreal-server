@@ -7,7 +7,7 @@
 void DeadLockProfiler::PushLock(const char* name)
 {
     LockGuard guard(_lock);
-    //¾ÆÀÌµğ¸¦ Ã£°Å³ª ¹ß±ŞÇÑ´Ù(ºĞÇÏ±â À§ÇÑ)
+    //ì•„ì´ë””ë¥¼ ì°¾ê±°ë‚˜ ë°œê¸‰í•œë‹¤(ë¶„í•˜ê¸° ìœ„í•œ)
     int32 lockId = 0; 
 
     auto findIt = _nameToId.find(name);
@@ -22,15 +22,15 @@ void DeadLockProfiler::PushLock(const char* name)
         lockId = findIt->second;
     }
 
-    //Àâ°íÀÖ´Â ¶ôÀÌ ÀÖ¾ú´Ù¸é
-    if (_lockStack.empty() == false)
+    //ì¡ê³ ìˆëŠ” ë½ì´ ìˆì—ˆë‹¤ë©´
+    if (LLockStack.empty() == false)
     {
-        //±âÁ¸¿¡ ¹ß°ßµÇÁö ¾ÊÀº ÄÉÀÌ½º¶ó¸é µ¥µå¶ô ¿©ºÎ ´Ù½Ã È®ÀÎÇÑ´Ù.
-        const int32 prevId = _lockStack.top();
+        //ê¸°ì¡´ì— ë°œê²¬ë˜ì§€ ì•Šì€ ì¼€ì´ìŠ¤ë¼ë©´ ë°ë“œë½ ì—¬ë¶€ ë‹¤ì‹œ í™•ì¸í•œë‹¤.
+        const int32 prevId = LLockStack.top();
         if (lockId != prevId)
         {
             set<int32> history = _lockHistory[prevId];
-            //Ã³À½¹ß°ß
+            //ì²˜ìŒë°œê²¬
             if (history.find(lockId) == history.end())
             {
                 history.insert(lockId);
@@ -39,21 +39,21 @@ void DeadLockProfiler::PushLock(const char* name)
         }
     }
 
-    _lockStack.push(lockId);
+    LLockStack.push(lockId);
 }
 
 void DeadLockProfiler::PopLock(const char* name)
 {
     LockGuard guard(_lock);
 
-    if (_lockStack.empty())
+    if (LLockStack.empty())
         CRASH("MULTIPLE_UNLOCK");
 
     int32 lockId = _nameToId[name];
-    if (_lockStack.top() != lockId)
+    if (LLockStack.top() != lockId)
         CRASH("INVALID_UNLOCK");
 
-    _lockStack.pop();
+    LLockStack.pop();
 }
 
 void DeadLockProfiler::CheckCycle()
@@ -69,7 +69,7 @@ void DeadLockProfiler::CheckCycle()
         Dfs(lockId);
     }
 
-    //¿¬»êÀÌ ³¡³µÀ¸¸é Á¤¸®ÇÑ´Ù.
+    //ì—°ì‚°ì´ ëë‚¬ìœ¼ë©´ ì •ë¦¬í•œë‹¤.
     _discoveredOrder.clear();
     _finished.clear();
     _parent.clear();
@@ -82,7 +82,7 @@ void DeadLockProfiler::Dfs(int32 here)
 
     _discoveredOrder[here] = _discoveredCount++;
 
-    //¸ğµç ÀÎÁ¡ÇÑ Á¤Á¡À» ¼øÈ¸ÇÑ´Ù
+    //ëª¨ë“  ì¸ì í•œ ì •ì ì„ ìˆœíšŒí•œë‹¤
     auto findIt = _lockHistory.find(here);
     if (findIt == _lockHistory.end())
     {
@@ -93,7 +93,7 @@ void DeadLockProfiler::Dfs(int32 here)
     set<int32>& nextSet = findIt->second;
     for (int32 there : nextSet)
     {
-        //¾ÆÁ÷ ¹æ¹®ÇÑ ÀûÀÌ ¾ø´Ù¸é ¹æ¹®ÇÑ´Ù.
+        //ì•„ì§ ë°©ë¬¸í•œ ì ì´ ì—†ë‹¤ë©´ ë°©ë¬¸í•œë‹¤.
         if (_discoveredCount)
         {
             _parent[there] = here;
@@ -101,13 +101,13 @@ void DeadLockProfiler::Dfs(int32 here)
             continue;
         }
 
-        //here°¡ thereº¸´Ù ¸ÕÀú ¹ß°ßµÇ¾ú´Ù¸é, there´Â hereÀÇ ÈÄ¼ÕÀÌ´Ù (¼ø¹æÇâ°£¼±)
+        //hereê°€ thereë³´ë‹¤ ë¨¼ì € ë°œê²¬ë˜ì—ˆë‹¤ë©´, thereëŠ” hereì˜ í›„ì†ì´ë‹¤ (ìˆœë°©í–¥ê°„ì„ )
         if (_discoveredOrder[here] < _discoveredOrder[there])
         {
             continue;
         }
 
-        //¼ø¹æÇâÀÌ ¾Æ´Ï°í, Dfs(there)°¡ ¾ÆÁ÷ Á¾·áÇÏÁö ¾Ê¾Ò´Ù¸é, there´Â hereÀÇ ¼±Á¶ÀÌ´Ù (¿ª¹æÇâ °£¼±)
+        //ìˆœë°©í–¥ì´ ì•„ë‹ˆê³ , Dfs(there)ê°€ ì•„ì§ ì¢…ë£Œí•˜ì§€ ì•Šì•˜ë‹¤ë©´, thereëŠ” hereì˜ ì„ ì¡°ì´ë‹¤ (ì—­ë°©í–¥ ê°„ì„ )
         if (_finished[there] == false)
         {
             printf("%s -> %s\n", _idToName[here], _idToName[there]);
